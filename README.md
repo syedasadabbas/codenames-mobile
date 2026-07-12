@@ -38,16 +38,48 @@ npm run ios        # iOS simulator (macOS only)
 npm run typecheck  # tsc --noEmit
 ```
 
-## Build store binaries
+## Troubleshooting: Expo stuck on "loading" / never opens
 
-Use [EAS Build](https://docs.expo.dev/build/introduction/):
+Almost always the phone can't reach the Metro bundler over your LAN (different
+network, VPN, or a firewall blocking port 8081). Fixes, in order:
+
+1. **Use tunnel mode** (works across networks): `npm run start:tunnel`
+2. Make sure the phone and computer are on the **same Wi‑Fi**.
+3. Clear the cache: `npm run start:clear`
+4. Force-close and reopen **Expo Go**, then rescan.
+
+The app also wraps itself in an error boundary, so a real crash shows the error
+on screen instead of a blank loading view.
+
+## Downloadable APK (Android sideload)
+
+Build an installable APK with EAS (no Play Store needed):
 
 ```bash
 npm install -g eas-cli
-eas login
-eas build -p android   # .aab / .apk
-eas build -p ios       # .ipa (Apple Developer account required)
+eas login                      # your Expo account
+eas build -p android --profile preview
 ```
+
+EAS returns a URL to the `.apk`. Share that link, or download the `.apk` and
+host it (e.g. put it in the web app's `public/` and set `NEXT_PUBLIC_APK_URL` so
+the "Get the Android app" button on the site links to it).
+
+## Store binaries + submission
+
+```bash
+# Production builds
+eas build -p android --profile production   # .aab for Google Play
+eas build -p ios     --profile production   # .ipa (needs an Apple Developer account, $99/yr)
+
+# Submit
+eas submit -p android    # uploads the .aab to Google Play (needs a Play Console account, $25 one-time)
+eas submit -p ios        # uploads to App Store Connect
+```
+
+Store submission requires the developer accounts and signing credentials, which
+EAS will prompt you to create/manage. See
+<https://docs.expo.dev/submit/introduction/>.
 
 ## What's included
 
