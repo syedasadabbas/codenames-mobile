@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -12,6 +13,7 @@ import { getSocket } from "../socket";
 import { getName, setName as saveName, setIdentity } from "../storage";
 import { colors, radius } from "../theme";
 import type { CreateJoinAck, GameVariant, Identity } from "../protocol";
+import { useAuthProfile } from "../hooks/useAuth";
 
 export default function HomeScreen({
   onEnterRoom,
@@ -20,6 +22,7 @@ export default function HomeScreen({
   onEnterRoom: (code: string, identity: Identity | null) => void;
   onOpenAccount: () => void;
 }) {
+  const profile = useAuthProfile();
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
@@ -69,13 +72,31 @@ export default function HomeScreen({
     setBusy(true);
     setError(null);
     setStatus("Finding a match…");
-    getSocket().emit("match:find", { name: name || "Anonymous", variant }, handle);
+    getSocket().emit("match:find", { name: name || "Anonymous", variant }, (ack: CreateJoinAck) => {
+      setBusy(false);
+      setStatus(null);
+      if (!(ack.ok && ack.code && ack.identity)) {
+        setError(ack.error ?? "Could not find a match.");
+        return;
+      }
+      setIdentity(ack.code, ack.identity);
+      if (ack.created) {
+        // No open public room was available, so one was created for us.
+        Alert.alert(
+          "No open rooms right now",
+          "We created a public room and you're the host — others who Quick Match will join you. Share the code to invite friends.",
+          [{ text: "OK", onPress: () => onEnterRoom(ack.code!, ack.identity!) }],
+        );
+      } else {
+        onEnterRoom(ack.code, ack.identity);
+      }
+    });
   }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Pressable style={styles.friendsBtn} onPress={onOpenAccount}>
-        <Text style={styles.friendsText}>Friends</Text>
+        <Text style={styles.friendsText}>{profile ? profile.displayName : "Sign in / Friends"}</Text>
       </Pressable>
       <Text style={styles.title}>
         <Text style={{ color: colors.red }}>CODE</Text>
