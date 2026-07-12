@@ -15,8 +15,10 @@ import type { CreateJoinAck, GameVariant, Identity } from "../protocol";
 
 export default function HomeScreen({
   onEnterRoom,
+  onOpenAccount,
 }: {
   onEnterRoom: (code: string, identity: Identity | null) => void;
+  onOpenAccount: () => void;
 }) {
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
@@ -72,6 +74,9 @@ export default function HomeScreen({
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <Pressable style={styles.friendsBtn} onPress={onOpenAccount}>
+        <Text style={styles.friendsText}>Friends</Text>
+      </Pressable>
       <Text style={styles.title}>
         <Text style={{ color: colors.red }}>CODE</Text>
         <Text style={{ color: colors.blue }}>NAMES</Text>
@@ -148,6 +153,8 @@ function Btn({
 
 const styles = StyleSheet.create({
   container: { padding: 20, gap: 10 },
+  friendsBtn: { alignSelf: "flex-end", backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 8 },
+  friendsText: { color: colors.text, fontWeight: "700" },
   title: { fontSize: 40, fontWeight: "900", textAlign: "center", letterSpacing: 4, marginTop: 12 },
   tagline: { color: colors.muted, textAlign: "center", marginBottom: 12 },
   label: { color: colors.muted, fontSize: 13, marginTop: 6 },
