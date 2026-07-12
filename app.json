@@ -13,10 +13,12 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.decodrs.codenames"
+      "bundleIdentifier": "com.decodrs.codenames",
+      "buildNumber": "1"
     },
     "android": {
       "package": "com.decodrs.codenames",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#0f172a"
       }
