@@ -1,0 +1,25 @@
+# Codenames Mobile — change log
+# Every change is recorded here with its justification (newest at the bottom).
+
+[2026-07-12] Web-parity batch 1 — bring the mobile client up to the web app's feature set.
+  Justification: the mobile app was missing many controls/screens present on the web app; users
+  asked for full parity ("each and every option, feature and functionality").
+
+  - src/protocol.ts: added WORD_PACK_META and TIMER_OPTIONS (mirrors of the backend metadata) and the
+      social DM types (PublicUser, DMView, ConversationView). Needed so the mobile lobby controls and
+      DM UI use the same ids/labels the server expects.
+  - src/hooks/useRoom.ts: added host lobby actions — setVariant, setWordPack, setTimer, setPrivate,
+      resetTeams, randomizeTeams — emitting the existing server events (room:setVariant, room:setWordPack,
+      settings:update, room:setPrivate, teams:reset, teams:randomize). These existed on web but not mobile.
+  - src/components/Lobby.tsx: added a host-only "HOST CONTROLS" panel (game mode, word pack, turn timer,
+      public/private, reset/randomize teams) matching the web lobby.
+  - src/components/RulesModal.tsx (new): "How to play" modal, content mirrored from the web RulesModal.
+  - src/screens/RoomScreen.tsx: added a Rules button in the room header that opens RulesModal.
+  - src/auth.ts: added updateProfile() (PATCH /api/profile) so users can edit their display name; the
+      reissued token is applied to the socket.
+  - src/hooks/useSocial.ts: added DM actions — dmHistory, sendDm, markDmRead.
+  - src/components/DMThread.tsx (new): direct-message conversation view with live delivery and
+      sent/delivered/seen receipts, mirroring the web DM panel.
+  - src/screens/AccountScreen.tsx: display-name editing UI; friends are now tappable to open a DM thread.
+
+  Verification: `npx tsc --noEmit` passes (exit 0). On-device run pending (no simulator in this env).
