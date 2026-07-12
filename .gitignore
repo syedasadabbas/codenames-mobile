@@ -20,5 +20,6 @@ web-build/
 # misc
 .DS_Store
 *.log
+!CHANGELOG.log
 .env
 .env*.local
