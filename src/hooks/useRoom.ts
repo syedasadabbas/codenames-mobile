@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getSocket } from "../socket";
-import type { CreateJoinAck, Identity, PlayerRole, RoomView, Team } from "../protocol";
+import type { CreateJoinAck, GameVariant, Identity, PlayerRole, RoomView, Team } from "../protocol";
 
 export interface RoomActions {
   setTeam: (team: Team | null) => void;
@@ -12,6 +12,13 @@ export interface RoomActions {
   returnToLobby: () => void;
   sendChat: (text: string) => void;
   leave: () => void;
+  // Host lobby controls (mirror the web app).
+  setVariant: (variant: GameVariant) => void;
+  setWordPack: (packId: string) => void;
+  setTimer: (turnSeconds: number | null) => void;
+  setPrivate: (isPrivate: boolean) => void;
+  resetTeams: () => void;
+  randomizeTeams: () => void;
 }
 
 /**
@@ -68,6 +75,12 @@ export function useRoom(code: string, identity: Identity | null) {
     returnToLobby: () => s.emit("game:newGame"),
     sendChat: (text) => s.emit("chat:send", { text }),
     leave: () => s.emit("room:leave"),
+    setVariant: (variant) => s.emit("room:setVariant", { variant }),
+    setWordPack: (packId) => s.emit("room:setWordPack", { packId }),
+    setTimer: (turnSeconds) => s.emit("settings:update", { turnSeconds }),
+    setPrivate: (isPrivate) => s.emit("room:setPrivate", { isPrivate }),
+    resetTeams: () => s.emit("teams:reset"),
+    randomizeTeams: () => s.emit("teams:randomize"),
   };
 
   return { view, connected, error, actions };
