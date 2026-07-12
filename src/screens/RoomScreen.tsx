@@ -7,6 +7,7 @@ import Scoreboard from "../components/Scoreboard";
 import Board from "../components/Board";
 import CluePanel from "../components/CluePanel";
 import Chat from "../components/Chat";
+import InviteButton from "../components/InviteButton";
 
 export default function RoomScreen({
   code,
@@ -41,6 +42,12 @@ export default function RoomScreen({
       </View>
 
       {error && <Text style={styles.error}>{error}</Text>}
+
+      {view && (
+        <View style={styles.inviteBar}>
+          <InviteButton canInvite={view.phase !== "playing" && view.players.length < 30} />
+        </View>
+      )}
 
       {!view ? (
         <View style={styles.center}>
@@ -102,6 +109,7 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: "center", justifyContent: "center", gap: 10 },
   loading: { color: colors.muted },
   error: { color: "#f87171", textAlign: "center", marginVertical: 6 },
+  inviteBar: { marginBottom: 6 },
   game: { flex: 1, gap: 10 },
   banner: { borderRadius: radius.md, padding: 12, alignItems: "center", gap: 8 },
   bannerText: { color: colors.white, fontWeight: "900", fontSize: 18 },
