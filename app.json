@@ -6,7 +6,9 @@
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "scheme": "codenames",
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "splash": {
       "backgroundColor": "#0f172a",
       "resizeMode": "contain"
@@ -25,6 +27,12 @@
     },
     "web": {
       "bundler": "metro"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "124ba8ea-9e5d-4dd0-9115-5a34deb416b9"
+      }
+    },
+    "owner": "maxisean"
   }
 }
