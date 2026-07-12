@@ -94,3 +94,25 @@ export async function logout(): Promise<void> {
   await persist();
   notify();
 }
+
+/** Update the signed-in user's display name (PATCH /api/profile). Reissues the token. */
+export async function updateProfile(displayName: string): Promise<{ ok: boolean; error?: string }> {
+  if (!API_URL) return { ok: false, error: "Accounts unavailable — set EXPO_PUBLIC_WEB_URL." };
+  if (!token) return { ok: false, error: "Not signed in." };
+  try {
+    const res = await fetch(API_URL + "/api/profile", {
+      method: "PATCH",
+      headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
+      body: JSON.stringify({ displayName: displayName.trim() }),
+    });
+    const data = await res.json();
+    if (!res.ok) return { ok: false, error: data.error || "Failed." };
+    token = data.token;
+    profile = data.profile;
+    await persist();
+    notify();
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Network error." };
+  }
+}
