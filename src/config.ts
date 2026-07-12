@@ -12,6 +12,10 @@ export const SOCKET_URL =
 
 export const WEB_URL = process.env.EXPO_PUBLIC_WEB_URL || "";
 
+/** REST base for accounts (login/register/profile) — the web app on Vercel.
+ * Required for accounts, friends, and invites; guest play works without it. */
+export const API_URL = WEB_URL;
+
 /** Resolve a server-relative asset path (e.g. a picture card) to an absolute URL. */
 export function assetUrl(path: string): string {
   if (!path) return "";
