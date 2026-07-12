@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Alert, SafeAreaView, StyleSheet } from "react-native";
+import { Alert, StyleSheet } from "react-native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import HomeScreen from "./src/screens/HomeScreen";
 import RoomScreen from "./src/screens/RoomScreen";
@@ -69,8 +70,9 @@ export default function App() {
   }, [profile]);
 
   return (
+    <SafeAreaProvider>
     <ErrorBoundary>
-    <SafeAreaView style={styles.root}>
+    <SafeAreaView style={styles.root} edges={["top", "bottom", "left", "right"]}>
       <StatusBar style="light" />
       {nav.screen === "home" && (
         <HomeScreen
@@ -86,6 +88,7 @@ export default function App() {
       )}
     </SafeAreaView>
     </ErrorBoundary>
+    </SafeAreaProvider>
   );
 }
 
