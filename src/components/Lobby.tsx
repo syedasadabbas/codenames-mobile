@@ -1,8 +1,15 @@
 import * as Clipboard from "expo-clipboard";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { colors, radius } from "../theme";
-import type { PlayerView, RoomView, Team } from "../protocol";
+import { TIMER_OPTIONS, WORD_PACK_META } from "../protocol";
+import type { GameVariant, PlayerView, RoomView, Team } from "../protocol";
 import type { RoomActions } from "../hooks/useRoom";
+
+const VARIANTS: { id: GameVariant; label: string }[] = [
+  { id: "classic", label: "Words" },
+  { id: "pictures", label: "Pictures" },
+  { id: "coop", label: "Co-op" },
+];
 
 export default function Lobby({ view, actions }: { view: RoomView; actions: RoomActions }) {
   const coop = view.variant === "coop";
@@ -19,6 +26,8 @@ export default function Lobby({ view, actions }: { view: RoomView; actions: Room
       <Text style={styles.variant}>
         {coop ? "Co-op" : view.variant === "pictures" ? "Pictures" : "Words"} · {view.wordPack}
       </Text>
+
+      {view.you.isHost && <HostControls view={view} actions={actions} />}
 
       <TeamCol team="blue" label={coop ? "YOUR TEAM" : "BLUE TEAM"} view={view} actions={actions} />
       {!coop && <TeamCol team="red" label="RED TEAM" view={view} actions={actions} />}
@@ -46,6 +55,64 @@ export default function Lobby({ view, actions }: { view: RoomView; actions: Room
         {coop ? "Your team needs a spymaster and an operative (2+)." : "Each team needs a spymaster and an operative (4+)."}
       </Text>
     </ScrollView>
+  );
+}
+
+function HostControls({ view, actions }: { view: RoomView; actions: RoomActions }) {
+  const showPacks = view.variant !== "pictures";
+  return (
+    <View style={styles.hostPanel}>
+      <Text style={styles.hostTitle}>HOST CONTROLS</Text>
+
+      <Text style={styles.ctrlLabel}>Game mode</Text>
+      <View style={styles.chipRow}>
+        {VARIANTS.map((v) => (
+          <Chip key={v.id} label={v.label} active={view.variant === v.id} onPress={() => actions.setVariant(v.id)} />
+        ))}
+      </View>
+
+      {showPacks && (
+        <>
+          <Text style={styles.ctrlLabel}>Word pack</Text>
+          <View style={styles.chipRow}>
+            {WORD_PACK_META.map((p) => (
+              <Chip key={p.id} label={p.name} active={view.wordPack === p.id} onPress={() => actions.setWordPack(p.id)} />
+            ))}
+          </View>
+        </>
+      )}
+
+      <Text style={styles.ctrlLabel}>Turn timer</Text>
+      <View style={styles.chipRow}>
+        {TIMER_OPTIONS.map((t) => (
+          <Chip
+            key={t.label}
+            label={t.label}
+            active={view.settings.turnSeconds === t.value}
+            onPress={() => actions.setTimer(t.value)}
+          />
+        ))}
+      </View>
+
+      <Text style={styles.ctrlLabel}>Room</Text>
+      <View style={styles.chipRow}>
+        <Chip
+          label={view.isPublic ? "Public" : "Private"}
+          active={view.isPublic}
+          onPress={() => actions.setPrivate(view.isPublic)}
+        />
+        <Chip label="Reset teams" active={false} onPress={actions.resetTeams} />
+        <Chip label="Randomize teams" active={false} onPress={actions.randomizeTeams} />
+      </View>
+    </View>
+  );
+}
+
+function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+  return (
+    <Pressable style={[styles.chip, active && styles.chipActive]} onPress={onPress}>
+      <Text style={[styles.chipText, active && styles.chipTextActive]}>{label}</Text>
+    </Pressable>
   );
 }
 
@@ -107,6 +174,14 @@ const styles = StyleSheet.create({
   copy: { backgroundColor: colors.sky, borderRadius: radius.sm, paddingHorizontal: 12, paddingVertical: 8 },
   copyText: { color: colors.white, fontWeight: "800" },
   variant: { color: colors.muted, textAlign: "center", textTransform: "capitalize" },
+  hostPanel: { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, borderRadius: radius.md, padding: 10, gap: 6 },
+  hostTitle: { color: colors.amber, fontWeight: "900", fontSize: 12, letterSpacing: 1 },
+  ctrlLabel: { color: colors.muted, fontWeight: "800", fontSize: 12, marginTop: 4 },
+  chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
+  chip: { backgroundColor: colors.surface2, borderColor: colors.border, borderWidth: 1, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7 },
+  chipActive: { backgroundColor: colors.sky, borderColor: colors.sky },
+  chipText: { color: colors.text, fontWeight: "700", fontSize: 13 },
+  chipTextActive: { color: colors.white },
   teamCol: { borderWidth: 2, borderRadius: radius.md, padding: 8, gap: 6 },
   teamHeader: { color: colors.white, fontWeight: "900", textAlign: "center", paddingVertical: 6, borderRadius: radius.sm, letterSpacing: 2 },
   roleLabel: { color: colors.muted, fontWeight: "800", fontSize: 12, marginTop: 4 },
