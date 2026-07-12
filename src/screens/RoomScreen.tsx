@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { useRoom } from "../hooks/useRoom";
 import { colors, radius } from "../theme";
@@ -8,6 +9,7 @@ import Board from "../components/Board";
 import CluePanel from "../components/CluePanel";
 import Chat from "../components/Chat";
 import InviteButton from "../components/InviteButton";
+import RulesModal from "../components/RulesModal";
 
 export default function RoomScreen({
   code,
@@ -19,6 +21,7 @@ export default function RoomScreen({
   onLeave: () => void;
 }) {
   const { view, connected, error, actions } = useRoom(code, identity);
+  const [rulesOpen, setRulesOpen] = useState(false);
 
   function leave() {
     actions.leave();
@@ -27,6 +30,7 @@ export default function RoomScreen({
 
   return (
     <View style={styles.root}>
+      <RulesModal visible={rulesOpen} variant={view?.variant ?? "classic"} onClose={() => setRulesOpen(false)} />
       <View style={styles.header}>
         <Text style={styles.logo}>
           <Text style={{ color: colors.red }}>CODE</Text>
@@ -35,6 +39,9 @@ export default function RoomScreen({
         <View style={styles.headerRight}>
           <Text style={styles.code}>{code}</Text>
           <View style={[styles.dot, { backgroundColor: connected ? "#34d399" : "#f87171" }]} />
+          <Pressable style={styles.rulesBtn} onPress={() => setRulesOpen(true)}>
+            <Text style={styles.rulesText}>Rules</Text>
+          </Pressable>
           <Pressable style={styles.exitBtn} onPress={leave}>
             <Text style={styles.exitText}>Exit</Text>
           </Pressable>
@@ -104,6 +111,8 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
   },
   dot: { width: 8, height: 8, borderRadius: 4 },
+  rulesBtn: { backgroundColor: colors.surface2, borderColor: colors.border, borderWidth: 1, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
+  rulesText: { color: colors.text, fontWeight: "700" },
   exitBtn: { backgroundColor: colors.red, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
   exitText: { color: colors.white, fontWeight: "700" },
   center: { flex: 1, alignItems: "center", justifyContent: "center", gap: 10 },
