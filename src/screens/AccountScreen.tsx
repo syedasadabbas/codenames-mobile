@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { colors, radius } from "../theme";
-import { accountsAvailable, login, logout, register } from "../auth";
+import { accountsAvailable, login, logout, register, updateProfile } from "../auth";
 import { applyAuthToken } from "../socket";
 import { useSocial, type PublicUser } from "../hooks/useSocial";
+import DMThread from "../components/DMThread";
 
 export default function AccountScreen({
   onClose,
@@ -89,6 +90,7 @@ function SignedIn({ social, onJoinRoom }: { social: ReturnType<typeof useSocial>
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PublicUser[]>([]);
   const [sent, setSent] = useState<Record<string, string>>({});
+  const [chatWith, setChatWith] = useState<PublicUser | null>(null);
   const friendIds = new Set(social.friends.map((f) => f.userId));
 
   useEffect(() => {
@@ -103,14 +105,54 @@ function SignedIn({ social, onJoinRoom }: { social: ReturnType<typeof useSocial>
 
   const invites = social.notifications.filter((n) => n.type === "game_invite" && n.roomCode);
 
+  const [editing, setEditing] = useState(false);
+  const [displayName, setDisplayName] = useState(social.profile?.displayName ?? "");
+  const [saveErr, setSaveErr] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  async function saveName() {
+    setSaving(true);
+    setSaveErr(null);
+    const r = await updateProfile(displayName);
+    setSaving(false);
+    if (r.ok) {
+      setEditing(false);
+      applyAuthToken(); // reconnect socket with the reissued token/name
+    } else {
+      setSaveErr(r.error ?? "Failed.");
+    }
+  }
+
   return (
     <ScrollView contentContainerStyle={styles.body}>
       <View style={styles.rowBetween}>
         <Text style={styles.name}>{social.profile?.displayName}</Text>
-        <Pressable onPress={() => { logout(); applyAuthToken(); }}>
-          <Text style={styles.link}>Sign out</Text>
-        </Pressable>
+        <View style={styles.row}>
+          <Pressable onPress={() => { setDisplayName(social.profile?.displayName ?? ""); setEditing((e) => !e); }}>
+            <Text style={styles.link}>Edit</Text>
+          </Pressable>
+          <Pressable onPress={() => { logout(); applyAuthToken(); }}>
+            <Text style={styles.link}>Sign out</Text>
+          </Pressable>
+        </View>
       </View>
+      {editing && (
+        <View style={styles.editBox}>
+          <Text style={styles.muted}>Display name</Text>
+          <TextInput
+            style={styles.input}
+            value={displayName}
+            maxLength={20}
+            placeholder="Display name"
+            placeholderTextColor={colors.muted}
+            onChangeText={setDisplayName}
+          />
+          {saveErr && <Text style={styles.error}>{saveErr}</Text>}
+          <Pressable style={styles.primary} onPress={saveName} disabled={saving || displayName.trim().length === 0}>
+            <Text style={styles.primaryText}>{saving ? "Saving…" : "Save"}</Text>
+          </Pressable>
+        </View>
+      )}
 
       {invites.length > 0 && (
         <>
@@ -187,12 +229,15 @@ function SignedIn({ social, onJoinRoom }: { social: ReturnType<typeof useSocial>
       <Text style={styles.section}>FRIENDS ({social.friends.length})</Text>
       {social.friends.length === 0 && <Text style={styles.muted}>No friends yet. Search above to add someone.</Text>}
       {social.friends.map((f) => (
-        <View key={f.userId} style={styles.item}>
+        <Pressable key={f.userId} style={styles.item} onPress={() => setChatWith(f)}>
           <View style={[styles.dot, { backgroundColor: f.online ? "#34d399" : colors.muted }]} />
           <Text style={styles.itemText}>{f.displayName}</Text>
           <Text style={styles.muted}>{f.online ? "online" : "offline"}</Text>
-        </View>
+          <Text style={styles.chatCue}>Message ›</Text>
+        </Pressable>
       ))}
+
+      {chatWith && <DMThread friend={chatWith} social={social} onClose={() => setChatWith(null)} />}
     </ScrollView>
   );
 }
@@ -206,6 +251,8 @@ const styles = StyleSheet.create({
   form: { gap: 10 },
   body: { gap: 8, paddingBottom: 40 },
   rowBetween: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  row: { flexDirection: "row", alignItems: "center", gap: 16 },
+  editBox: { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, borderRadius: radius.md, padding: 10, gap: 8, marginTop: 8 },
   name: { color: colors.text, fontSize: 18, fontWeight: "800" },
   section: { color: colors.muted, fontWeight: "800", fontSize: 12, marginTop: 12 },
   input: {
@@ -219,6 +266,7 @@ const styles = StyleSheet.create({
   },
   item: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: colors.surface, borderRadius: radius.sm, paddingHorizontal: 10, paddingVertical: 8 },
   itemText: { color: colors.text, flex: 1 },
+  chatCue: { color: colors.sky, fontWeight: "700", fontSize: 12 },
   dot: { width: 8, height: 8, borderRadius: 4 },
   accept: { backgroundColor: colors.green, borderRadius: radius.sm, paddingHorizontal: 10, paddingVertical: 6 },
   decline: { backgroundColor: colors.surface2, borderColor: colors.border, borderWidth: 1, borderRadius: radius.sm, paddingHorizontal: 10, paddingVertical: 6 },
