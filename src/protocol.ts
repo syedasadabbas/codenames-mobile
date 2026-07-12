@@ -104,3 +104,49 @@ export interface SimpleAck {
   ok: boolean;
   error?: string;
 }
+
+/** Selectable word packs (word-based variants). Mirror of the backend metadata. */
+export const WORD_PACK_META: { id: string; name: string; difficulty: "easy" | "medium" | "hard" }[] = [
+  { id: "mixed", name: "Mixed", difficulty: "medium" },
+  { id: "everyday", name: "Everyday", difficulty: "easy" },
+  { id: "animals", name: "Animals", difficulty: "easy" },
+  { id: "food", name: "Food & Drink", difficulty: "easy" },
+  { id: "geography", name: "Geography", difficulty: "medium" },
+  { id: "movies", name: "Movies & TV", difficulty: "medium" },
+  { id: "sports", name: "Sports", difficulty: "medium" },
+  { id: "science", name: "Science & Tech", difficulty: "hard" },
+];
+
+/** Per-turn timer options offered to the host (seconds; null = off). */
+export const TIMER_OPTIONS: { label: string; value: number | null }[] = [
+  { label: "Off", value: null },
+  { label: "30s", value: 30 },
+  { label: "60s", value: 60 },
+  { label: "90s", value: 90 },
+  { label: "120s", value: 120 },
+];
+
+// --- Social (accounts only) ----------------------------------------------
+
+export interface PublicUser {
+  userId: string;
+  username: string;
+  displayName: string;
+}
+
+export interface DMView {
+  id: string;
+  fromUserId: string;
+  toUserId: string;
+  body: string;
+  at: number;
+  deliveredAt: number | null;
+  seenAt: number | null;
+}
+
+export interface ConversationView {
+  user: PublicUser;
+  online: boolean;
+  lastMessage: DMView | null;
+  unread: number;
+}
