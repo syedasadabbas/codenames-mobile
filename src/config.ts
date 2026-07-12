@@ -14,7 +14,9 @@ export const SOCKET_URL = trim(
   process.env.EXPO_PUBLIC_SOCKET_URL || "https://code-names-h3ar.onrender.com",
 );
 
-export const WEB_URL = trim(process.env.EXPO_PUBLIC_WEB_URL || "");
+export const WEB_URL = trim(
+  process.env.EXPO_PUBLIC_WEB_URL || "https://codenames.decodrs.com",
+);
 
 /** REST base for accounts (login/register/profile) — the web app on Vercel.
  * Required for accounts, friends, and invites; guest play works without it. */
