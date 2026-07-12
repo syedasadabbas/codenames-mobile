@@ -23,3 +23,16 @@
   - src/screens/AccountScreen.tsx: display-name editing UI; friends are now tappable to open a DM thread.
 
   Verification: `npx tsc --noEmit` passes (exit 0). On-device run pending (no simulator in this env).
+
+[2026-07-12] APK distribution — make the app buildable into a publicly downloadable APK.
+  Justification: user wants a sideloadable Android APK linked from the web app so anyone on the
+  internet can download it (separate from the Play/App Store listings). EAS cloud build produces a
+  public artifact URL; the web app's download button already reads NEXT_PUBLIC_APK_URL.
+  - app.json: added android.versionCode (1) and ios.buildNumber ("1") so version metadata is explicit
+      for release builds.
+  - eas.json: switched cli.appVersionSource from "remote" to "local" so the first `eas build` reads the
+      version from app.json without an interactive remote-version prompt.
+  - BUILD_AND_PUBLISH.md (new): step-by-step to log in, init the Expo project, build the preview APK,
+      and wire the resulting artifact URL into the web app via NEXT_PUBLIC_APK_URL.
+  Note: the actual `eas build` requires an interactive Expo login and cannot be run in this environment;
+  the user runs it on their machine. No APK binary is committed (artifacts are hosted by EAS/Expo).
