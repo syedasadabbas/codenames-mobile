@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { getSocket } from "../socket";
 import { useAuthProfile } from "./useAuth";
+import type { DMView } from "../protocol";
 
 export interface PublicUser {
   userId: string;
@@ -90,6 +91,15 @@ export function useSocial() {
       new Promise<{ ok: boolean; error?: string }>((resolve) =>
         getSocket().emit("game:invite", { toUserId }, resolve),
       ),
+    dmHistory: (withUserId: string) =>
+      new Promise<DMView[]>((resolve) =>
+        getSocket().emit("dm:history", { withUserId }, (d: { messages: DMView[] }) => resolve(d.messages)),
+      ),
+    sendDm: (toUserId: string, body: string) =>
+      new Promise<{ ok: boolean; error?: string; message?: DMView }>((resolve) =>
+        getSocket().emit("dm:send", { toUserId, body }, resolve),
+      ),
+    markDmRead: (withUserId: string) => getSocket().emit("dm:read", { withUserId }),
     dismissNotification: (id: string) => {
       getSocket().emit("notif:read", { id });
       setNotifications((ns) => ns.filter((n) => n.id !== id));
