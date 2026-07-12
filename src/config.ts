@@ -7,10 +7,14 @@
 //
 // Override at runtime with EXPO_PUBLIC_* env vars (e.g. in eas.json or .env).
 
-export const SOCKET_URL =
-  process.env.EXPO_PUBLIC_SOCKET_URL || "https://code-names-h3ar.onrender.com";
+/** Drop any trailing slash so we never build double-slash URLs (…com//api/...). */
+const trim = (u: string) => u.replace(/\/+$/, "");
 
-export const WEB_URL = process.env.EXPO_PUBLIC_WEB_URL || "";
+export const SOCKET_URL = trim(
+  process.env.EXPO_PUBLIC_SOCKET_URL || "https://code-names-h3ar.onrender.com",
+);
+
+export const WEB_URL = trim(process.env.EXPO_PUBLIC_WEB_URL || "");
 
 /** REST base for accounts (login/register/profile) — the web app on Vercel.
  * Required for accounts, friends, and invites; guest play works without it. */
