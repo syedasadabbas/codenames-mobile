@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "Codenames",
+    "slug": "codenames-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "scheme": "codenames",
+    "assetBundlePatterns": ["**/*"],
+    "splash": {
+      "backgroundColor": "#0f172a",
+      "resizeMode": "contain"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.decodrs.codenames"
+    },
+    "android": {
+      "package": "com.decodrs.codenames",
+      "adaptiveIcon": {
+        "backgroundColor": "#0f172a"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
